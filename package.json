@@ -1,0 +1,30 @@
+{
+  "name": "google-news-cli",
+  "version": "1.0.0",
+  "description": "A terminal client to get the latest news from Google News",
+  "main": "bin/cli.js",
+  "type": "module",
+  "bin": {
+    "google-news": "./bin/cli.js"
+  },
+  "scripts": {
+    "start": "node bin/cli.js"
+  },
+  "keywords": [
+    "news",
+    "google-news",
+    "cli",
+    "terminal",
+    "rss"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@inquirer/prompts": "^5.0.7",
+    "boxen": "^8.0.1",
+    "chalk": "^5.3.0",
+    "open": "^10.1.0",
+    "ora": "^8.0.1",
+    "rss-parser": "^3.13.0"
+  }
+}
