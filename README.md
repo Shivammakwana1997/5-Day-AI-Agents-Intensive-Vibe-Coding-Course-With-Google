@@ -1,3 +1,52 @@
+# 5-Day AI Agents Intensive Vibe Coding Course with Google 🚀
+
+Welcome to the course repository! This branch (`Day3`) contains the code and architecture for Day 3.
+
+## 📂 Navigation
+- [Day 1: Google News CLI](#google-news-cli-) (in the root directory)
+- [Day 3: AI Agents - Routing Workflows & Tool Calling](Day3/README.md) (in the `Day3/` directory)
+
+---
+
+## 🏗️ Day 3 Project Architecture & Workflows
+
+### 1. Customer Support Routing Agent
+This agent uses a multi-stage **Workflow** diagram. When a request comes in:
+1. **Save Query**: Persists the user's query into the workflow context.
+2. **Classifier Agent**: An LLM agent (`gemini-3.1-flash-lite`) determines whether the request is shipping-related or unrelated, outputting a structured Pydantic schema.
+3. **Router Node**: Evaluates the classification and dynamically routes the request to either the FAQ responder or the decline message.
+
+```mermaid
+graph TD
+    START([Start User Request]) --> save_query[Save Query to Context]
+    save_query --> classifier_agent[Classifier LLM Agent]
+    classifier_agent --> route_query{Router Node}
+    route_query -->|Shipping Related| shipping_faq_agent[Shipping FAQ Agent 🚚✨]
+    route_query -->|Unrelated| decline_answer[Decline Node 🚫]
+    shipping_faq_agent --> END([End Response])
+    decline_answer --> END
+```
+
+### 2. Weather Assistant (Tool Calling)
+This assistant demonstrates **Function Calling (Tool Use)**. Rather than relying solely on pre-trained weights, the agent evaluates the query, decides if it requires external data, and triggers the appropriate Python function:
+- `get_weather(query)`: Simulates looking up current temperatures.
+- `get_current_time(query)`: Resolves real-time timezones using standard Python modules.
+
+```mermaid
+graph TD
+    User([User Request]) --> Agent[Weather Assistant Agent]
+    Agent -->|Evaluate prompt| Model{Gemini Model}
+    Model -->|Decide Tool Call| ToolChoice{Tool Needed?}
+    ToolChoice -->|Yes| get_weather[get_weather tool 🌦️]
+    ToolChoice -->|Yes| get_current_time[get_current_time tool ⏰]
+    ToolChoice -->|No| Respond[Generate Response]
+    get_weather --> Agent
+    get_current_time --> Agent
+    Respond --> User
+```
+
+---
+
 # Google News CLI 📰
 
 A lightweight, premium, interactive terminal application built in Node.js to read, search, and view the latest news from Google News RSS feeds directly in your command line.
