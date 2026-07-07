@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "database-schema-validator": {
+      "source": "rominirani/antigravity-skills",
+      "sourceType": "github",
+      "skillPath": "skills_tutorial/database-schema-validator/SKILL.md",
+      "computedHash": "10a0e5a7ec6b41252d4f6ea77fb120058e5a4d6b2d6f4f2e5b1711c3c8525d8a"
+    }
+  }
+}
