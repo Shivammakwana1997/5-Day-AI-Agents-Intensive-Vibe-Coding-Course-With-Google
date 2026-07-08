@@ -93,7 +93,8 @@ graph TD
     Respond --> User
 ```
 
-📂 **[View Day 3 →](./Day3/README.md)**
+📂 **[View Day 3 →](./Day3/README.md)**  
+📐 **[Architecture Docs →](./Day3/ARCHITECTURE.md)**
 
 ---
 
