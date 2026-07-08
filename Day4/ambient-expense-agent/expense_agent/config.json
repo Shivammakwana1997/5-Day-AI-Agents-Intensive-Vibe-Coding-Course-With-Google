@@ -1,0 +1,4 @@
+{
+  "threshold": 100.0,
+  "model": "gemini-3.1-flash-lite"
+}

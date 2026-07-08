@@ -1,127 +1,192 @@
 # 5-Day AI Agents Intensive Vibe Coding Course with Google 🚀
 
-Welcome to the course repository! This branch (`Day3`) contains the code and architecture for Day 3.
-
-## 📂 Navigation
-- [Day 1: Google News CLI](#google-news-cli-) (in the root directory)
-- [Day 3: AI Agents - Routing Workflows & Tool Calling](Day3/README.md) (in the `Day3/` directory)
+> A hands-on, project-based course exploring the full spectrum of AI Agent development — from simple CLI tools to ambient, event-driven multi-agent systems — using **Google's Agent Development Kit (ADK)**, **Gemini models**, and **Google Cloud Platform**.
 
 ---
 
-## 🏗️ Day 3 Project Architecture & Workflows
+## 📂 Course Navigation
+
+| Day | Topic | Project | Status |
+|-----|-------|---------|--------|
+| **Day 1** | Node.js CLI & News APIs | [Google News CLI](#-day-1-google-news-cli) | ✅ Complete |
+| **Day 2** | Google AI Studio | [`Google_AI_studio/`](./Google_AI_studio/) | ✅ Complete |
+| **Day 3** | ADK Routing Workflows & Tool Calling | [`Day3/`](./Day3/README.md) | ✅ Complete |
+| **Day 4** | Ambient Agents & Human-in-the-Loop | [`Day4/`](./Day4/ambient-expense-agent/README.md) | ✅ Complete |
+| **Day 5** | Multi-Agent Systems | _Coming soon_ | 🔜 |
+
+---
+
+## 🏗️ Day 4: Ambient Expense Agent
+
+### Overview
+An **event-driven, ambient AI agent** that processes corporate expense submissions through a multi-stage security and approval pipeline — featuring **Human-in-the-Loop (HITL)** workflows, **PII redaction**, **prompt injection detection**, and structured **Gemini LLM** risk auditing.
+
+### Architecture Diagram
+
+```mermaid
+flowchart TD
+    A[📨 Expense JSON / Pub·Sub Event] --> B[parse_expense_node]
+
+    B -->|amount < $100| C[✅ auto_approve_node]
+    B -->|amount ≥ $100| D[🔐 security_checkpoint_node]
+    B -->|invalid JSON| Z[❌ parse_error_node]
+    B -->|approve / reject reply| H
+
+    D -->|Prompt Injection Detected| H
+    D -->|Clean — PII Scrubbed| E[🤖 llm_review_node\nGemini Risk Audit]
+
+    E --> H[👤 human_approval_node\nRequestInput Interrupt]
+
+    H -->|approve| F[📝 Approved]
+    H -->|reject| G[📝 Rejected]
+
+    C --> OUT[📤 ExpenseResponse]
+    F --> OUT
+    G --> OUT
+    Z --> OUT
+```
+
+### Key Features
+- 🔐 **Multi-Layer Security** — PII scrubbing + prompt injection detection before any LLM call
+- 🤖 **LLM Risk Auditing** — Gemini analyzes policy violations, suspicious patterns, vague descriptions
+- 👤 **Human-in-the-Loop** — ADK `RequestInput` suspends/resumes workflow awaiting human decision
+- 📦 **Structured Outputs** — Pydantic-enforced `ExpenseResponse` schema
+- 🌐 **FastAPI + ADK Dev UI** — Full web interface for testing and interaction
+- 🐳 **Docker + Cloud Run Ready** — Production deployment on GCP
+
+📂 **[View Day 4 →](./Day4/ambient-expense-agent/README.md)**  
+📐 **[Architecture Docs →](./Day4/ambient-expense-agent/ARCHITECTURE.md)**
+
+---
+
+## 🏗️ Day 3: AI Agents — Routing Workflows & Tool Calling
 
 ### 1. Customer Support Routing Agent
-This agent uses a multi-stage **Workflow** diagram. When a request comes in:
-1. **Save Query**: Persists the user's query into the workflow context.
-2. **Classifier Agent**: An LLM agent (`gemini-3.1-flash-lite`) determines whether the request is shipping-related or unrelated, outputting a structured Pydantic schema.
-3. **Router Node**: Evaluates the classification and dynamically routes the request to either the FAQ responder or the decline message.
+
+A multi-stage workflow that classifies user queries and routes them to specialized handlers.
 
 ```mermaid
 graph TD
     START([Start User Request]) --> save_query[Save Query to Context]
     save_query --> classifier_agent[Classifier LLM Agent]
     classifier_agent --> route_query{Router Node}
-    route_query -->|Shipping Related| shipping_faq_agent[Shipping FAQ Agent 🚚✨]
+    route_query -->|Shipping Related| shipping_faq_agent[Shipping FAQ Agent 🚚]
     route_query -->|Unrelated| decline_answer[Decline Node 🚫]
     shipping_faq_agent --> END([End Response])
     decline_answer --> END
 ```
 
-### 2. Weather Assistant (Tool Calling)
-This assistant demonstrates **Function Calling (Tool Use)**. Rather than relying solely on pre-trained weights, the agent evaluates the query, decides if it requires external data, and triggers the appropriate Python function:
-- `get_weather(query)`: Simulates looking up current temperatures.
-- `get_current_time(query)`: Resolves real-time timezones using standard Python modules.
+### 2. Weather Assistant — Tool Calling
+
+Demonstrates **function calling** where the agent decides which Python tool to invoke at runtime.
 
 ```mermaid
 graph TD
     User([User Request]) --> Agent[Weather Assistant Agent]
     Agent -->|Evaluate prompt| Model{Gemini Model}
-    Model -->|Decide Tool Call| ToolChoice{Tool Needed?}
-    ToolChoice -->|Yes| get_weather[get_weather tool 🌦️]
-    ToolChoice -->|Yes| get_current_time[get_current_time tool ⏰]
+    Model --> ToolChoice{Tool Needed?}
+    ToolChoice -->|Yes| get_weather[get_weather 🌦️]
+    ToolChoice -->|Yes| get_current_time[get_current_time ⏰]
     ToolChoice -->|No| Respond[Generate Response]
     get_weather --> Agent
     get_current_time --> Agent
     Respond --> User
 ```
 
----
-
-# Google News CLI 📰
-
-A lightweight, premium, interactive terminal application built in Node.js to read, search, and view the latest news from Google News RSS feeds directly in your command line.
+📂 **[View Day 3 →](./Day3/README.md)**
 
 ---
 
-## Features
-- 🔥 **Top Stories**: Instantly view the trending headlines from around the world.
-- 📂 **Topic Categories**: Browse news curated by major categories:
-  - Technology, Business, Science, Health, Sports, Entertainment, World, and Nation.
-- 🔍 **Search Query**: Find specific news articles using keywords or phrases.
-- 🌍 **Region / Language Preferences**: Choose from multiple locales (such as US, UK, India, Germany, Japan, etc.) to fetch news in your language and country.
-- 🔢 **Custom Limits**: Control the number of articles displayed (5 to 50).
-- 🌐 **Browser Integration**: Jump straight from the terminal to the full article on the web.
-- ⚡ **Direct Search Mode**: Bypass the menu and search instantly from the command line (e.g. `npm start -- "artificial intelligence"`).
+## 📰 Day 1: Google News CLI
 
----
+A **premium interactive terminal app** built with Node.js for reading, searching, and browsing the latest news from Google News RSS feeds — directly in your command line.
 
-## Prerequisites
-- [Node.js](https://nodejs.org/) (v18.0.0 or higher recommended)
+### Features
 
----
+| Feature | Description |
+|---------|-------------|
+| 🔥 **Top Stories** | Trending headlines from around the world |
+| 📂 **Topic Categories** | Technology, Business, Science, Health, Sports, Entertainment |
+| 🔍 **Keyword Search** | Find articles by topic or phrase |
+| 🌍 **Region & Language** | US, UK, India, Germany, Japan, and more |
+| 🔢 **Custom Limits** | Control articles displayed (5–50) |
+| 🌐 **Browser Integration** | Open full articles directly in your browser |
 
-## Installation & Setup
+### Quick Start
 
-1. **Clone or navigate to the directory**:
-   ```bash
-   cd "a:\5-day online course\my-first-project"
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
----
-
-## How to Run
-
-### 1. Interactive CLI Mode
-Run the tool interactively to navigate menus, select articles, view details, and change settings:
 ```bash
+# Install dependencies
+npm install
+
+# Run interactively
 npm start
-```
-*Alternatively, if running the CLI file directly:*
-```bash
-node bin/cli.js
-```
 
-### 2. Direct Search Mode
-Search for specific news topics immediately:
-```bash
+# Direct search
 npm start -- "artificial intelligence"
-# or
-node bin/cli.js "artificial intelligence"
 ```
 
-### 3. Display Options & Help
-Get details on command-line arguments and version:
-```bash
-node bin/cli.js --help
-node bin/cli.js --version
+### Dependencies
+
+- `@inquirer/prompts` — Interactive CLI prompts
+- `rss-parser` — XML RSS parsing
+- `chalk` — Terminal colors
+- `boxen` — Elegant border boxes
+- `open` — Open URLs in browser
+- `ora` — Terminal spinner animations
+
+---
+
+## 🛠️ Repository Structure
+
+```
+5-Day-AI-Agents-Intensive/
+├── Day3/                          # Day 3: Routing Workflows & Tool Calling
+│   ├── customer-support-agent/    # Multi-stage routing agent
+│   ├── weather-assistant/         # Tool calling demo
+│   └── README.md
+│
+├── Day4/                          # Day 4: Ambient Agent + HITL
+│   └── ambient-expense-agent/     # ⭐ Main Day 4 project
+│       ├── expense_agent/         # ADK 2.0 workflow + nodes
+│       ├── tests/                 # Unit, integration, eval tests
+│       ├── README.md
+│       └── ARCHITECTURE.md
+│
+├── Google_AI_studio/              # Day 2: AI Studio explorations
+│
+├── bin/                           # Day 1: Google News CLI binary
+├── lib/                           # Day 1: CLI library modules
+├── package.json                   # Day 1: Node.js dependencies
+├── demo.py                        # General demo script
+└── README.md                      # This file
 ```
 
 ---
 
-## Configuration Settings
-Preferences are stored in a local `.google-news-cli.json` file inside the project directory, so your configuration persists between runs. You can modify these settings via the `⚙ Settings` menu inside the application.
+## 🚀 Tech Stack Across the Course
+
+| Technology | Used In |
+|-----------|---------|
+| **Node.js** | Day 1 — CLI tool |
+| **Python 3.11** | Day 3, Day 4 |
+| **Google ADK 2.0** | Day 3, Day 4 — Workflow orchestration |
+| **Gemini API (AI Studio)** | Day 3, Day 4 — LLM capabilities |
+| **Pydantic** | Day 3, Day 4 — Structured outputs |
+| **FastAPI + uvicorn** | Day 4 — API server |
+| **OpenTelemetry** | Day 4 — Observability |
+| **Docker** | Day 4 — Containerization |
+| **Google Cloud Run** | Day 4 — Serverless deployment |
+| **uv** | Day 3, Day 4 — Python package management |
 
 ---
 
-## Dependencies
-- `@inquirer/prompts` - Modular and fully accessible command line prompts.
-- `rss-parser` - Simple, lightweight XML RSS parsing library.
-- `chalk` - Terminal color styling.
-- `boxen` - Draws elegant border boxes in the terminal.
-- `open` - Seamlessly opens URLs in the default browser.
-- `ora` - Graceful terminal spinner animations.
+## 📖 Resources
+
+- [Google Agent Development Kit (ADK)](https://adk.dev/)
+- [Gemini API Documentation](https://ai.google.dev/docs)
+- [Google AI Studio](https://aistudio.google.com/)
+- [Google Cloud Run](https://cloud.google.com/run)
+
+---
+
+*This repository is part of the 5-Day AI Agents Intensive Vibe Coding Course with Google.*
